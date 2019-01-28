@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  ws-mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./docker-mysql/init-script/:/docker-entrypoint-initdb.d/:ro"
+      - "./docker-mysql/db/lib/:/var/lib/mysql/"
+      - "./docker-mysql/db/log/:/var/log/mysql/"
+      - "./docker-mysql/db/conf.d/:/etc/mysql/mysql.conf.d/"
+    hostname: ws-mysql
+    container_name: ws-mysql
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=root
+
+  manage-backend:
+    build: ./backend
+    image: whshare/manage-backend
+    ports:
+      - "8080:8080"
+    links:
+      - ws-mysql
+    hostname: manage-backend
+    container_name: manage-backend
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: docker/Dockerfile
+    image: whshare/manage-frontend
+    ports:
+      - "80:80"
+    hostname: manage-frontend
+    container_name: manage-frontend
